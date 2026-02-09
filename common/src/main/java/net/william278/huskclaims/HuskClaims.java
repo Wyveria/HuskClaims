@@ -20,6 +20,7 @@
 package net.william278.huskclaims;
 
 import net.kyori.adventure.key.Key;
+import net.william278.cloplib.operation.Operation;
 import net.william278.huskclaims.api.HuskClaimsAPI;
 import net.william278.huskclaims.claim.ClaimManager;
 import net.william278.huskclaims.command.CommandProvider;
@@ -184,6 +185,18 @@ public interface HuskClaims extends Task.Supplier, ConfigProvider, UserProvider,
     @NotNull
     default HuskClaims getPlugin() {
         return this;
+    }
+
+    /**
+     * Returns whether to allow container open at the operation position (e.g. when the block is an EzChestShop shop).
+     * When true, the operation will be allowed for CONTAINER_OPEN. Platform implementations may check for
+     * third-party shop plugins so that players can use chest shops in claims without granting container trust.
+     *
+     * @param operation the container open operation
+     * @return true to allow the operation
+     */
+    default boolean shouldBypassContainerOpenForShop(@NotNull Operation operation) {
+        return false;
     }
 
 }

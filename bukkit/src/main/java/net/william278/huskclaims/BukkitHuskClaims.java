@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.william278.cloplib.operation.Operation;
 import net.william278.cloplib.operation.OperationType;
 import net.william278.desertwell.util.Version;
 import net.william278.huskclaims.api.BukkitHuskClaimsAPI;
@@ -63,7 +64,12 @@ import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.block.TileState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -307,6 +313,32 @@ public class BukkitHuskClaims extends JavaPlugin implements HuskClaims, BukkitTa
     @NotNull
     public BukkitHuskClaims getPlugin() {
         return this;
+    }
+
+    @Override
+    public boolean shouldBypassContainerOpenForShop(@NotNull Operation operation) {
+        if (Bukkit.getPluginManager().getPlugin("EzChestShop") == null) {
+            return false;
+        }
+        if (!(operation.getOperationPosition() instanceof Position position)) {
+            return false;
+        }
+        final org.bukkit.World world = Bukkit.getWorld(position.getWorld().getUuid()) != null
+            ? Bukkit.getWorld(position.getWorld().getUuid())
+            : Bukkit.getWorld(position.getWorld().getName());
+        if (world == null) {
+            return false;
+        }
+        final Block block = world.getBlockAt(
+            position.getBlockX(),
+            (int) Math.floor(position.getY()),
+            position.getBlockZ()
+        );
+        if (!(block.getState() instanceof TileState state)) {
+            return false;
+        }
+        final PersistentDataContainer pdc = state.getPersistentDataContainer();
+        return pdc.has(NamespacedKey.fromString("ezchestshop:owner"), PersistentDataType.STRING);
     }
 
     public static class Adapter {

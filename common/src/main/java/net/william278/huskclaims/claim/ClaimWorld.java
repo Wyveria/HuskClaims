@@ -443,9 +443,14 @@ public class ClaimWorld {
      * @since 1.0
      */
     public boolean isOperationAllowed(@NotNull Operation operation, @NotNull HuskClaims plugin) {
-        return getClaimAt((Position) operation.getOperationPosition())
+        final boolean allowed = getClaimAt((Position) operation.getOperationPosition())
                 .map(claim -> isOperationAllowedInClaim(operation, claim, plugin))
                 .orElseGet(() -> isOperationAllowedInWilderness(operation, plugin));
+        if (!allowed && operation.getType() == OperationType.CONTAINER_OPEN
+                && plugin.shouldBypassContainerOpenForShop(operation)) {
+            return true;
+        }
+        return allowed;
     }
 
     /**
